@@ -655,8 +655,8 @@
           Final year Computer Science student at KIIT University specializing in Software Engineering and Machine Learning. I build scalable, data-driven solutions with a published research paper accepted at Springer SCI-2026.
         </p>
         <div class="hero-actions reveal" style="--delay:0.2s">
-          <button class="btn-primary" onclick="scrollTo('projects')">View Projects</button>
-          <button class="btn-ghost" onclick="scrollTo('contact')">Let's Talk</button>
+          <button class="btn-primary" onclick="scrollToSection('projects')">View Projects</button>
+          <button class="btn-ghost" onclick="scrollToSection('contact')">Let's Talk</button>
         </div>
         <div class="social-row reveal" style="--delay:0.25s">
           <a href="https://github.com/kritish3228" target="_blank" class="social-icon" title="GitHub">
@@ -1215,10 +1215,13 @@
     // NAV LOGO fix
     document.querySelector('.nav-logo').textContent = '{KY}';
 
-    // SCROLL HELPER
-    function scrollTo(id) {
+    // SCROLL HELPER — used by all nav buttons (scrollToSection) and hero buttons
+    function scrollToSection(id) {
       const el = document.getElementById(id);
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      if (!el) return;
+      const navH = document.getElementById('navbar')?.offsetHeight || 72;
+      const top = el.getBoundingClientRect().top + window.scrollY - navH - 8;
+      window.scrollTo({ top, behavior: 'smooth' });
     }
 
     // MOBILE MENU
