@@ -1,47 +1,175 @@
-# Kritish Yadav — Portfolio
+# 🌐 Kritish Yadav — Developer Portfolio
 
-## 🚀 How to Use
+A modern, responsive, and interactive portfolio showcasing my projects, research, technical skills, and professional experience in Software Development, Machine Learning, and AI.
 
-Open `index.html` in any modern browser — **no build step, no server required**.
-`index.html` now properly links to `style.css` and `script.js` (previously these
-existed as separate files but weren't actually linked; the site was running on
-one big self-contained file). Keep all four files in the same folder.
+🔗 **Live Website:** https://www.kritishyadav.com.np
 
-### Files
-- `index.html` — Markup only
-- `style.css` — All styles, organized into numbered sections (variables, reset,
-  navbar, hero, about, experience/projects, research, skills, education,
-  certifications, contact, footer, responsive)
-- `script.js` — All behavior (cursor, nav, mobile menu, scroll reveal, project
-  card glow, accuracy bar, contact form)
-- `favicon.png` — Browser tab icon
-- `README.md` — This file
+---
 
-### Required assets (add these — referenced by the site but not included)
-Create an `assets/images/` folder next to `index.html` and add:
-1. `assets/images/kritish.jpg` — your About section photo
-2. `assets/images/certificate.png` — your NTC internship certificate. Clicking
-   the certificate icon (top-right of the Experience card) opens this image
-   in a new tab.
+## ✨ Highlights
 
-### Customize Links
-Search for `href="#"` and replace with your actual project repo URLs.
-- LinkedIn: already set to your full URL
-- GitHub: search `github.com/kritish3228` → already correct
-- Certification "View Credential" links currently point to `#` placeholders
+- Modern dark-themed UI with glassmorphism design
+- Fully responsive across desktop, tablet, and mobile
+- Smooth animations and scroll reveal effects
+- Interactive project timeline with hover animations
+- Research publication showcase
+- Professional experience section
+- Custom animated cursor
+- SEO-friendly and lightweight
+- No frameworks or build tools required
 
-### Deploy
-- **GitHub Pages**: Push to a repo, enable Pages on the `main` branch
-- **Vercel**: Drag and drop the folder at vercel.com
-- **Netlify**: Drag and drop the folder at netlify.com
+---
 
-## ✨ Features
-- Clean separation of HTML / CSS / JS, zero dependencies (no npm, no build step)
-- Custom cursor with smooth follow animation
-- Scroll-triggered reveal animations
-- Vertical timeline layout shared by the Experience and Projects sections
-- Animated accuracy progress bar
-- Mobile responsive with hamburger menu
-- Dark glassmorphism design with amber accent
-- Interactive project/experience cards with mouse glow effect
-- Skip-to-content link and keyboard-accessible mobile menu
+## 🚀 Tech Stack
+
+- HTML5
+- CSS3
+- JavaScript (ES6)
+- CSS Variables
+- Intersection Observer API
+- Responsive Design
+- Vanilla JavaScript Animations
+
+---
+
+## 📂 Project Structure
+
+```text
+KRITISH-PORTFOLIO/
+│
+├── assets/
+│   ├── images/
+│   ├── icons/
+│   └── ...
+│
+├── favicon.png
+├── index.html
+├── style.css
+├── script.js
+└── README.md
+```
+
+---
+
+## ⚡ Getting Started
+
+Clone the repository:
+
+```bash
+git clone https://github.com/kritish3228/kritish-portfolio.git
+cd kritish-portfolio
+```
+
+Open `index.html` in your browser.
+
+No installation required.
+
+No dependencies required.
+
+No build step required.
+
+---
+
+## 📸 Preview
+
+Add screenshots here:
+
+### Hero Section
+
+![Hero](assets/images/hero-preview.png)
+
+### Projects Section
+
+![Projects](assets/images/projects-preview.png)
+
+### Experience Section
+
+![Experience](assets/images/experience-preview.png)
+
+---
+
+## 🌟 Features
+
+- Smooth scrolling navigation
+- Scroll reveal animations
+- Animated progress indicators
+- Interactive project cards
+- Mouse glow effects
+- Responsive navigation menu
+- Professional experience timeline
+- Research publication showcase
+- Optimized performance
+- Lightweight and fast loading
+
+---
+
+## 💼 Featured Projects
+
+### Smart Hospital Management System
+
+Android application integrating patient records, appointment management, medication tracking, and facial recognition for secure access to medical information.
+
+### FinRobot — AI-Assisted Investment Analysis Platform
+
+Real-time financial analytics platform utilizing machine learning and live market data to assist investment decision-making.
+
+### CSAF — Brain Tumor Classification
+
+Research project introducing Cascading Self-Attention Funnel (CSAF) for MRI-based brain tumor classification with **97.60% accuracy**, accepted at the **8th International Conference on Smart Computing and Informatics (SCI-2026)**.
+
+---
+
+## 👨‍💻 About Me
+
+I am **Kritish Yadav**, a Computer Science undergraduate at **KIIT University** with interests in:
+
+- Machine Learning
+- Artificial Intelligence
+- Full-Stack Development
+- Software Engineering
+- Deep Learning Research
+- Computer Vision
+
+---
+
+## 📫 Connect With Me
+
+🌐 Portfolio: https://www.kritishyadav.com.np
+
+💼 LinkedIn: https://linkedin.com/in/kritish-yadav
+
+💻 GitHub: https://github.com/kritish3228
+
+📧 Email: your-email@example.com
+
+---
+
+## 🚀 Deployment
+
+### GitHub Pages
+
+Enable GitHub Pages from:
+
+```
+Settings → Pages → Deploy from branch → main
+```
+
+### Vercel
+
+Import the repository into Vercel and deploy instantly.
+
+### Netlify
+
+Drag and drop the project folder into Netlify.
+
+---
+
+## ⭐ Support
+
+If you found this project useful or liked the design, consider giving the repository a **star ⭐**.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
