@@ -134,22 +134,48 @@ if (accuracyBar && barFill) {
 }
 
 /* ---------- 8. CONTACT FORM ---------- */
-function handleSubmit(e) {
-  e.preventDefault();
-  const submitBtn = document.getElementById('submitBtn');
-  const formWrap = document.getElementById('formWrap');
+const contactForm = document.getElementById('contactForm');
+const formStatus = document.getElementById('formStatus');
+const submitBtn = document.getElementById('submitBtn');
 
-  submitBtn.disabled = true;
-  submitBtn.textContent = '⏳ Sending...';
+if (contactForm && formStatus && submitBtn) {
+  contactForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    formStatus.className = 'form-status';
 
-  // Simulated send — replace with a real endpoint when one is available.
-  setTimeout(() => {
-    formWrap.innerHTML = `
-      <div class="form-success">
-        ✅ Message sent! I'll get back to you within 24 hours.<br/>
-        <a href="mailto:yadavkritish99@gmail.com" class="form-success-link">
-          Or reach me directly at yadavkritish99@gmail.com
-        </a>
-      </div>`;
-  }, 1500);
+    if (!contactForm.checkValidity()) {
+      contactForm.reportValidity();
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(new FormData(contactForm))),
+      });
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Unable to send your message right now.');
+      }
+
+      contactForm.reset();
+      formStatus.textContent = result.message || 'Message sent! I will get back to you soon.';
+      formStatus.classList.add('success');
+    } catch (error) {
+      formStatus.textContent = error instanceof Error
+        ? error.message
+        : 'Unable to send your message right now. Please email me directly.';
+      formStatus.classList.add('error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Send Message`;
+    }
+  });
 }

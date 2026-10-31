@@ -613,6 +613,9 @@ section { padding:100px 0; }
   color:var(--green); font-family:var(--font-d); font-size:1rem; font-weight:600;
 }
 .form-success-link { color:var(--accent); display:inline-block; margin-top:14px; font-size:0.88rem; font-weight:400; }
+.form-status { min-height:1.4em; font-size:0.82rem; text-align:center; }
+.form-status.success { color:var(--green); }
+.form-status.error { color:var(--red); }
 .form-note { font-size:0.75rem; color:var(--text-3); text-align:center; margin-top:8px; }
 .form-note-link { color:var(--accent); }
 

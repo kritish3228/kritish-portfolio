@@ -1,0 +1,20 @@
+{
+  "name": "kritish-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Kritish Yadav's portfolio with a MySQL-backed contact API.",
+  "main": "api/contact.js",
+  "scripts": {
+    "start": "vercel dev",
+    "test": "node --check api/contact.js && node --check script.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "mysql2": "^3.14.4"
+  },
+  "devDependencies": {
+    "vercel": "^48.10.2"
+  }
+}

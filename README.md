@@ -1,175 +1,120 @@
-# 🌐 Kritish Yadav — Developer Portfolio
+# Kritish Yadav — Developer Portfolio
 
-A modern, responsive, and interactive portfolio showcasing my projects, research, technical skills, and professional experience in Software Development, Machine Learning, and AI.
+A responsive, framework-free portfolio for Kritish Yadav, a Computer Science undergraduate focused on software engineering, machine learning, and AI research.
 
-🔗 **Live Website:** https://www.kritishyadav.com.np
+## Features
 
----
+- Dark glassmorphism UI with responsive layouts and scroll-reveal animations
+- About, experience, skills, projects, research, education, certifications, and contact sections
+- Resume download and GitHub, LinkedIn, and email links
+- Client-side form validation, loading state, duplicate-submit prevention, and accessible status messages
+- `POST /api/contact` serverless endpoint with MySQL persistence and Resend notifications
+- Prepared SQL statements, input limits, HTML email escaping, rate limiting, and safe public errors
 
-## ✨ Highlights
+## Technology
 
-- Modern dark-themed UI with glassmorphism design
-- Fully responsive across desktop, tablet, and mobile
-- Smooth animations and scroll reveal effects
-- Interactive project timeline with hover animations
-- Research publication showcase
-- Professional experience section
-- Custom animated cursor
-- SEO-friendly and lightweight
-- No frameworks or build tools required
+- HTML5, CSS3, and vanilla JavaScript
+- Node.js serverless functions on Vercel
+- MySQL with `mysql2`
+- Resend email API
 
----
-
-## 🚀 Tech Stack
-
-- HTML5
-- CSS3
-- JavaScript (ES6)
-- CSS Variables
-- Intersection Observer API
-- Responsive Design
-- Vanilla JavaScript Animations
-
----
-
-## 📂 Project Structure
+## Project structure
 
 ```text
-KRITISH-PORTFOLIO/
-│
+.
+├── api/contact.js          # Vercel contact endpoint
 ├── assets/
-│   ├── images/
 │   ├── icons/
-│   └── ...
-│
-├── favicon.png
+│   ├── images/
+│   └── resume/resume.pdf
+├── database/schema.sql     # MySQL database and table
 ├── index.html
-├── style.css
 ├── script.js
+├── style.css
+├── package.json
+├── .env.example
+├── vercel.json
 └── README.md
 ```
 
----
+## Local setup
 
-## ⚡ Getting Started
-
-Clone the repository:
+Requirements: Node.js 18+, a MySQL instance, and a Resend account.
 
 ```bash
 git clone https://github.com/kritish3228/kritish-portfolio.git
 cd kritish-portfolio
+npm install
 ```
 
-Open `index.html` in your browser.
+Copy `.env.example` to `.env` and fill in the values. Never commit `.env`.
 
-No installation required.
+## MySQL setup
 
-No dependencies required.
+Create the database and table with a MySQL client:
 
-No build step required.
-
----
-
-## 📸 Preview
-
-Add screenshots here:
-
-### Hero Section
-
-![Hero](assets/images/hero-preview.png)
-
-### Projects Section
-
-![Projects](assets/images/projects-preview.png)
-
-### Experience Section
-
-![Experience](assets/images/experience-preview.png)
-
----
-
-## 🌟 Features
-
-- Smooth scrolling navigation
-- Scroll reveal animations
-- Animated progress indicators
-- Interactive project cards
-- Mouse glow effects
-- Responsive navigation menu
-- Professional experience timeline
-- Research publication showcase
-- Optimized performance
-- Lightweight and fast loading
-
----
-
-## 💼 Featured Projects
-
-### Smart Hospital Management System
-
-Android application integrating patient records, appointment management, medication tracking, and facial recognition for secure access to medical information.
-
-### FinRobot — AI-Assisted Investment Analysis Platform
-
-Real-time financial analytics platform utilizing machine learning and live market data to assist investment decision-making.
-
-### CSAF — Brain Tumor Classification
-
-Research project introducing Cascading Self-Attention Funnel (CSAF) for MRI-based brain tumor classification with **97.60% accuracy**, accepted at the **8th International Conference on Smart Computing and Informatics (SCI-2026)**.
-
----
-
-## 👨‍💻 About Me
-
-I am **Kritish Yadav**, a Computer Science undergraduate at **KIIT University** with interests in:
-
-- Machine Learning
-- Artificial Intelligence
-- Full-Stack Development
-- Software Engineering
-- Deep Learning Research
-- Computer Vision
-
----
-
-## 📫 Connect With Me
-
-🌐 Portfolio: https://www.kritishyadav.com.np
-
-💼 LinkedIn: https://linkedin.com/in/kritish-yadav
-
-💻 GitHub: https://github.com/kritish3228
-
-📧 Email: your-email@example.com
-
----
-
-## 🚀 Deployment
-
-### GitHub Pages
-
-Enable GitHub Pages from:
-
-```
-Settings → Pages → Deploy from branch → main
+```bash
+mysql -u YOUR_USER -p < database/schema.sql
 ```
 
-### Vercel
+The API stores `name`, `email`, `subject`, `message`, delivery status, and a timestamp in `contact_messages`. It uses prepared statements and a small connection pool suitable for serverless reuse.
 
-Import the repository into Vercel and deploy instantly.
+## Environment variables
 
-### Netlify
+| Variable | Description |
+| --- | --- |
+| `DB_HOST` | Hostname of the hosted MySQL server |
+| `DB_PORT` | MySQL port, normally `3306` |
+| `DB_USER` | MySQL username |
+| `DB_PASSWORD` | MySQL password |
+| `DB_NAME` | Database name, normally `portfolio_db` |
+| `DB_SSL` | Set to `true` when the provider requires TLS |
+| `RESEND_API_KEY` | Resend API key |
+| `CONTACT_RECEIVER_EMAIL` | Address that receives notifications |
+| `CONTACT_SENDER_EMAIL` | Verified Resend sender, for example `Portfolio <contact@example.com>` |
+| `ALLOWED_ORIGIN` | Optional allowed origin; defaults to `*` |
 
-Drag and drop the project folder into Netlify.
+## Contact API
 
----
+`POST /api/contact` accepts JSON:
 
-## ⭐ Support
+```json
+{
+  "name": "Jane Doe",
+  "email": "jane@example.com",
+  "subject": "Project collaboration",
+  "message": "Hello!"
+}
+```
 
-If you found this project useful or liked the design, consider giving the repository a **star ⭐**.
+Successful requests return `201` and a JSON message. Invalid input returns `400`, unsupported methods return `405`, rate-limited clients return `429`, and service failures return a safe `500` response. If MySQL succeeds but Resend fails, the message remains stored and the API returns `202`.
 
----
+## Run locally
 
-## 📄 License
+Use Vercel's local runtime so `/api/contact` is available:
 
-This project is licensed under the MIT License.
+```bash
+npm start
+```
+
+Open the URL printed by Vercel. Opening `index.html` directly still renders the frontend, but the contact form requires the API runtime.
+
+The syntax check can be run with:
+
+```bash
+npm test
+```
+
+## Vercel deployment
+
+1. Import the GitHub repository into Vercel.
+2. Add every variable from `.env.example` in the project Environment Variables settings.
+3. Use a separately hosted MySQL database; Vercel does not provide a persistent local MySQL server.
+4. Verify the sender domain/address in Resend and set `CONTACT_SENDER_EMAIL` to that verified sender.
+5. Deploy and test the contact form from the production URL.
+
+No credentials, `.env` files, or `node_modules` are required in the repository. The included `vercel.json` only sets a bounded function duration; static files are served directly.
+
+## GitHub
+
+Push source code and configuration templates to GitHub, but keep credentials in local/Vercel environment variables. Review the repository before publishing to ensure no `.env` or provider secrets are staged.
