@@ -1,10 +1,10 @@
-const mysql = require('mysql2/promise');
+const { FieldValue } = require('firebase-admin/firestore');
+const { getDb } = require('../lib/firebase');
 
 const MAX_LENGTHS = { name: 100, email: 255, subject: 200, message: 5000 };
 const requestsByIp = new Map();
 const RATE_LIMIT = 5;
 const RATE_WINDOW_MS = 15 * 60 * 1000;
-let pool;
 
 function jsonResponse(res, status, body) {
   res.status(status).json(body);
@@ -40,23 +40,6 @@ function validate(body) {
   return { fields, errors };
 }
 
-function getPool() {
-  if (!pool) {
-    pool = mysql.createPool({
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT || 3306),
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_NAME,
-      waitForConnections: true,
-      connectionLimit: 2,
-      enableKeepAlive: true,
-      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: true } : undefined,
-    });
-  }
-  return pool;
-}
-
 async function sendEmail(fields) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.CONTACT_SENDER_EMAIL;
@@ -65,7 +48,10 @@ async function sendEmail(fields) {
 
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify({
       from,
       to: [to],
@@ -104,33 +90,40 @@ module.exports = async function handler(req, res) {
   const { fields, errors } = validate(req.body);
   if (errors.length) return jsonResponse(res, 400, { error: errors.join('. ') });
 
-  const required = ['DB_HOST', 'DB_USER', 'DB_NAME'];
+  const required = [
+    'FIREBASE_PROJECT_ID',
+    'FIREBASE_CLIENT_EMAIL',
+    'FIREBASE_PRIVATE_KEY',
+  ];
   if (required.some((key) => !process.env[key])) {
-    console.error('Contact API database configuration is incomplete');
+    console.error('Contact API Firebase configuration is incomplete');
     return jsonResponse(res, 500, { error: 'The contact service is not configured yet.' });
   }
 
-  let connection;
   try {
-    connection = await getPool().getConnection();
-    const [result] = await connection.execute(
-      'INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)',
-      [fields.name, fields.email, fields.subject, fields.message],
-    );
+    const document = await getDb().collection('contact_messages').add({
+      ...fields,
+      createdAt: FieldValue.serverTimestamp(),
+      status: 'new',
+      emailSent: false,
+    });
 
     try {
       await sendEmail(fields);
-      await connection.execute('UPDATE contact_messages SET email_sent = TRUE WHERE id = ?', [result.insertId]);
     } catch (emailError) {
       console.error('Contact saved but notification email failed:', emailError.message);
       return jsonResponse(res, 202, { message: 'Your message was saved. Email notification is temporarily delayed.' });
+    }
+
+    try {
+      await document.update({ emailSent: true });
+    } catch (updateError) {
+      console.error('Contact notification sent but delivery status update failed:', updateError.message);
     }
 
     return jsonResponse(res, 201, { message: 'Message sent successfully.' });
   } catch (error) {
     console.error('Contact API failed:', error.message);
     return jsonResponse(res, 500, { error: 'Unable to process your message right now.' });
-  } finally {
-    if (connection) connection.release();
   }
 };

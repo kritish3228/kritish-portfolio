@@ -8,14 +8,14 @@ A responsive, framework-free portfolio for Kritish Yadav, a Computer Science und
 - About, experience, skills, projects, research, education, certifications, and contact sections
 - Resume download and GitHub, LinkedIn, and email links
 - Client-side form validation, loading state, duplicate-submit prevention, and accessible status messages
-- `POST /api/contact` serverless endpoint with MySQL persistence and Resend notifications
-- Prepared SQL statements, input limits, HTML email escaping, rate limiting, and safe public errors
+- `POST /api/contact` serverless endpoint with Firestore persistence and Resend notifications
+- Input limits, HTML email escaping, rate limiting, and safe public errors
 
 ## Technology
 
 - HTML5, CSS3, and vanilla JavaScript
 - Node.js serverless functions on Vercel
-- MySQL with `mysql2`
+- Firebase Cloud Firestore through the Firebase Admin SDK
 - Resend email API
 
 ## Project structure
@@ -23,11 +23,11 @@ A responsive, framework-free portfolio for Kritish Yadav, a Computer Science und
 ```text
 .
 ├── api/contact.js          # Vercel contact endpoint
+├── lib/firebase.js         # Lazy, reusable Firebase Admin initialization
 ├── assets/
 │   ├── icons/
 │   ├── images/
 │   └── resume/resume.pdf
-├── database/schema.sql     # MySQL database and table
 ├── index.html
 ├── script.js
 ├── style.css
@@ -37,9 +37,44 @@ A responsive, framework-free portfolio for Kritish Yadav, a Computer Science und
 └── README.md
 ```
 
-## Local setup
+## Firebase setup
 
-Requirements: Node.js 18+, a MySQL instance, and a Resend account.
+1. Create or select a Firebase project.
+2. Create a Cloud Firestore database in that project.
+3. Create a service account and keep its JSON key outside the repository. The API does not read the JSON file directly; it uses the three credential environment variables below.
+4. Copy `.env.example` to `.env.local` and fill in the values.
+
+The API writes one document per valid submission to the `contact_messages` collection:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `name` | string | Trimmed visitor name |
+| `email` | string | Lowercase visitor email |
+| `subject` | string | Trimmed subject |
+| `message` | string | Trimmed message |
+| `createdAt` | timestamp | Firestore server timestamp |
+| `status` | string | Starts as `new` |
+| `emailSent` | boolean | Set to `true` after Resend accepts the notification |
+
+Firebase Admin runs only in the serverless API. Do not put service-account values in `index.html` or `script.js`, and do not disable Firestore security rules to work around configuration problems.
+
+## Environment variables
+
+| Variable | Description |
+| --- | --- |
+| `FIREBASE_PROJECT_ID` | Firebase project ID |
+| `FIREBASE_CLIENT_EMAIL` | Service account client email |
+| `FIREBASE_PRIVATE_KEY` | Service account private key; preserve escaped `\n` sequences in Vercel |
+| `RESEND_API_KEY` | Resend API key |
+| `CONTACT_RECEIVER_EMAIL` | Address that receives notifications |
+| `CONTACT_SENDER_EMAIL` | Verified Resend sender, such as `Portfolio <contact@example.com>` |
+| `ALLOWED_ORIGIN` | Optional allowed origin; defaults to `*` |
+
+Never commit `.env`, `.env.local`, or a service-account JSON file.
+
+## Local development
+
+Requirements: Node.js 18+, a Firebase project with Firestore enabled, and a Resend account.
 
 ```bash
 git clone https://github.com/kritish3228/kritish-portfolio.git
@@ -47,51 +82,7 @@ cd kritish-portfolio
 npm install
 ```
 
-Copy `.env.example` to `.env` and fill in the values. Never commit `.env`.
-
-## MySQL setup
-
-Create the database and table with a MySQL client:
-
-```bash
-mysql -u YOUR_USER -p < database/schema.sql
-```
-
-The API stores `name`, `email`, `subject`, `message`, delivery status, and a timestamp in `contact_messages`. It uses prepared statements and a small connection pool suitable for serverless reuse.
-
-## Environment variables
-
-| Variable | Description |
-| --- | --- |
-| `DB_HOST` | Hostname of the hosted MySQL server |
-| `DB_PORT` | MySQL port, normally `3306` |
-| `DB_USER` | MySQL username |
-| `DB_PASSWORD` | MySQL password |
-| `DB_NAME` | Database name, normally `portfolio_db` |
-| `DB_SSL` | Set to `true` when the provider requires TLS |
-| `RESEND_API_KEY` | Resend API key |
-| `CONTACT_RECEIVER_EMAIL` | Address that receives notifications |
-| `CONTACT_SENDER_EMAIL` | Verified Resend sender, for example `Portfolio <contact@example.com>` |
-| `ALLOWED_ORIGIN` | Optional allowed origin; defaults to `*` |
-
-## Contact API
-
-`POST /api/contact` accepts JSON:
-
-```json
-{
-  "name": "Jane Doe",
-  "email": "jane@example.com",
-  "subject": "Project collaboration",
-  "message": "Hello!"
-}
-```
-
-Successful requests return `201` and a JSON message. Invalid input returns `400`, unsupported methods return `405`, rate-limited clients return `429`, and service failures return a safe `500` response. If MySQL succeeds but Resend fails, the message remains stored and the API returns `202`.
-
-## Run locally
-
-Use Vercel's local runtime so `/api/contact` is available:
+Copy `.env.example` to `.env.local` and fill in the Firebase and Resend values. Run the Vercel local runtime so `/api/contact` is available:
 
 ```bash
 npm start
@@ -105,16 +96,31 @@ The syntax check can be run with:
 npm test
 ```
 
+## Contact API flow
+
+`POST /api/contact` accepts JSON matching the existing form:
+
+```json
+{
+  "name": "Jane Doe",
+  "email": "jane@example.com",
+  "subject": "Project collaboration",
+  "message": "Hello!"
+}
+```
+
+The endpoint validates and trims all fields, applies the existing in-memory IP rate limit, saves the message to Firestore, and then sends the Resend notification. A successful request returns `201`. Invalid input returns `400`, unsupported methods return `405`, rate-limited clients return `429`, and service failures return a safe `500` response. If Firestore succeeds but Resend fails, the message remains stored with `emailSent: false` and the API returns `202`.
+
 ## Vercel deployment
 
 1. Import the GitHub repository into Vercel.
-2. Add every variable from `.env.example` in the project Environment Variables settings.
-3. Use a separately hosted MySQL database; Vercel does not provide a persistent local MySQL server.
+2. Open **Project → Settings → Environment Variables**.
+3. Add every variable from `.env.example` for the environments where the site runs. For `FIREBASE_PRIVATE_KEY`, paste the service-account private key with its escaped `\n` line breaks.
 4. Verify the sender domain/address in Resend and set `CONTACT_SENDER_EMAIL` to that verified sender.
 5. Deploy and test the contact form from the production URL.
 
-No credentials, `.env` files, or `node_modules` are required in the repository. The included `vercel.json` only sets a bounded function duration; static files are served directly.
+Vercel does not need the service-account JSON file or any `.env` file committed to the repository. The included `vercel.json` only sets a bounded function duration; static files are served directly.
 
 ## GitHub
 
-Push source code and configuration templates to GitHub, but keep credentials in local/Vercel environment variables. Review the repository before publishing to ensure no `.env` or provider secrets are staged.
+Push source code and configuration templates to GitHub, but keep credentials in local/Vercel environment variables. Review the repository before publishing to ensure no secret files are staged.
